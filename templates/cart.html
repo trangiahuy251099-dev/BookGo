@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Giỏ hàng - BookGo{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <h2 class="fw-bold"><i class="bi bi-cart3"></i> Giỏ hàng của bạn</h2>
+    </div>
+</div>
+
+{% if cart_items %}
+<div class="table-responsive">
+    <table class="table table-bordered align-middle shadow-sm">
+        <thead class="table-dark">
+            <tr class="text-center">
+                <th>Sách</th>
+                <th>Đơn giá</th>
+                <th>Số lượng</th>
+                <th>Thành tiền</th>
+                <th></th>
+             </tr>
+        </thead>
+        <tbody>
+            {% for item in cart_items %}
+            <tr>
+                <td>
+                    <strong>{{ item.book.title }}</strong><br>
+                    <span class="text-muted small">{{ item.book.author }}</span>
+                 </td>
+                <td class="text-center">{{ "{:,}".format(item.book.price) }}đ</td>
+                <td class="text-center">
+                    <div class="d-flex justify-content-center align-items-center gap-2">
+                        <a href="{{ url_for('update_cart', book_id=item.book.id, quantity=item.quantity-1) }}" class="btn btn-sm btn-outline-secondary rounded-circle">−</a>
+                        <span class="fw-bold mx-1">{{ item.quantity }}</span>
+                        <a href="{{ url_for('update_cart', book_id=item.book.id, quantity=item.quantity+1) }}" class="btn btn-sm btn-outline-secondary rounded-circle">+</a>
+                    </div>
+                 </td>
+                <td class="text-center fw-bold">{{ "{:,}".format(item.subtotal) }}đ</td>
+                <td class="text-center">
+                    <a href="{{ url_for('update_cart', book_id=item.book.id, quantity=0) }}" class="btn btn-sm btn-danger rounded-pill">
+                        <i class="bi bi-trash"></i> Xóa
+                    </a>
+                 </td>
+             </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr class="table-warning">
+                <th colspan="3" class="text-end fs-5">Tổng cộng:</th>
+                <th colspan="2" class="text-start fs-5 text-danger">{{ "{:,}".format(total) }}đ</th>
+             </tr>
+        </tfoot>
+     </table>
+</div>
+<div class="d-flex justify-content-between mt-3">
+    <a href="{{ url_for('index') }}" class="btn btn-secondary rounded-pill"><i class="bi bi-arrow-left"></i> Mua thêm</a>
+    <div>
+        <a href="{{ url_for('clear_cart') }}" class="btn btn-outline-danger rounded-pill me-2" onclick="return confirm('Xóa hết?')"><i class="bi bi-trash3"></i> Xóa giỏ</a>
+        <a href="{{ url_for('checkout') }}" class="btn btn-success rounded-pill px-4 fw-bold"><i class="bi bi-credit-card"></i> Thanh toán</a>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info text-center shadow-sm">
+    <i class="bi bi-emoji-frown fs-3"></i>
+    <p class="mt-2">Giỏ hàng của bạn đang trống.</p>
+    <a href="{{ url_for('index') }}" class="btn btn-primary rounded-pill">Tiếp tục mua sắm</a>
+</div>
+{% endif %}
+{% endblock %}

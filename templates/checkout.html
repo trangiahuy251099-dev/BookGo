@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}Thanh toán - BookGo{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h2 class="mb-4"><i class="bi bi-credit-card"></i> Thanh toán đơn hàng</h2>
+
+    <div class="row g-4">
+        <!-- Cột thông tin nhận hàng -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-pencil-square"></i> Thông tin nhận hàng
+                </div>
+                <div class="card-body">
+                    <form method="post" id="checkoutForm">
+                        {% if session.user_id %}
+                            <!-- Đã đăng nhập: lấy thông tin từ profile -->
+                            <div class="mb-3">
+                                <label class="form-label">Họ và tên *</label>
+                                <input type="text" name="fullname" class="form-control" value="{{ user.fullname }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Số điện thoại *</label>
+                                <input type="tel" name="phone" class="form-control" value="{{ user.phone or '' }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" name="email" class="form-control" value="{{ user.email }}" readonly disabled>
+                            </div>
+                        {% else %}
+                            <!-- Chưa đăng nhập: bắt buộc nhập -->
+                            <div class="mb-3">
+                                <label class="form-label">Họ và tên *</label>
+                                <input type="text" name="fullname" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Số điện thoại *</label>
+                                <input type="tel" name="phone" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email *</label>
+                                <input type="email" name="email" class="form-control" required>
+                            </div>
+                        {% endif %}
+
+                        <!-- Địa chỉ chi tiết (dùng select tỉnh/huyện) -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Tỉnh/Thành phố *</label>
+                                <select name="province" id="province" class="form-select" required>
+                                    <option value="">-- Chọn tỉnh/thành --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Quận/Huyện *</label>
+                                <select name="district" id="district" class="form-select" required>
+                                    <option value="">-- Chọn quận/huyện --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 mt-3">
+                            <label class="form-label">Phường/Xã *</label>
+                            <input type="text" name="ward" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Địa chỉ cụ thể (số nhà, đường) *</label>
+                            <input type="text" name="address" class="form-control" placeholder="Ví dụ: 123 Đường ABC" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ghi chú (tùy chọn)</label>
+                            <textarea name="note" class="form-control" rows="2" placeholder="Ghi chú về đơn hàng..."></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột phương thức thanh toán + đơn hàng -->
+        <div class="col-lg-5">
+            <!-- Phương thức thanh toán -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <i class="bi bi-wallet2"></i> Phương thức thanh toán
+                </div>
+                <div class="card-body">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="payment_method" value="cod" form="checkoutForm" checked>
+                        <label class="form-check-label">Thanh toán khi nhận hàng (COD)</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="payment_method" value="vnpay" form="checkoutForm">
+                        <label class="form-check-label">VNPay</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="payment_method" value="momo" form="checkoutForm">
+                        <label class="form-check-label">Momo</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="payment_method" value="bank" form="checkoutForm">
+                        <label class="form-check-label">Chuyển khoản ngân hàng</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Đơn hàng của bạn -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <i class="bi bi-bag-check"></i> Đơn hàng của bạn
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for item in cart_items %}
+                        <div class="list-group-item d-flex align-items-center">
+                            <img src="{{ item.book.cover }}" alt="{{ item.book.title }}" width="50" height="65" class="rounded me-3" style="object-fit: cover;">
+                            <div class="flex-grow-1">
+                                <strong>{{ item.book.title }}</strong><br>
+                                <small class="text-muted">{{ item.book.author }}</small><br>
+                                <span class="text-muted small">x{{ item.quantity }}</span>
+                            </div>
+                            <div class="fw-bold text-danger">{{ "{:,}".format(item.subtotal) }}đ</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="p-3 bg-light">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tạm tính:</span>
+                            <span>{{ "{:,}".format(total) }}đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Phí vận chuyển:</span>
+                            <span>30,000đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between fw-bold fs-5">
+                            <span>Tổng cộng:</span>
+                            <span class="text-danger">{{ "{:,}".format(total + 30000) }}đ</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="submit" form="checkoutForm" class="btn btn-success w-100 py-2">
+                        <i class="bi bi-check-circle"></i> Đặt hàng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Dữ liệu tỉnh/thành phố và quận/huyện (đủ dùng cho form demo)
+const provinces = [
+    { code: "01", name: "Hà Nội" }, { code: "02", name: "Hồ Chí Minh" }, { code: "03", name: "Đà Nẵng" },
+    { code: "04", name: "Cần Thơ" }, { code: "05", name: "Hải Phòng" }, { code: "06", name: "An Giang" },
+    { code: "07", name: "Bà Rịa - Vũng Tàu" }, { code: "08", name: "Bắc Giang" }, { code: "09", name: "Bắc Kạn" },
+    { code: "10", name: "Bạc Liêu" }, { code: "11", name: "Bắc Ninh" }, { code: "12", name: "Bến Tre" },
+    { code: "13", name: "Bình Định" }, { code: "14", name: "Bình Dương" }, { code: "15", name: "Bình Phước" },
+    { code: "16", name: "Bình Thuận" }, { code: "17", name: "Cà Mau" }, { code: "18", name: "Cao Bằng" },
+    { code: "19", name: "Đắk Lắk" }, { code: "20", name: "Đắk Nông" }, { code: "21", name: "Điện Biên" },
+    { code: "22", name: "Đồng Nai" }, { code: "23", name: "Đồng Tháp" }, { code: "24", name: "Gia Lai" },
+    { code: "25", name: "Hà Giang" }, { code: "26", name: "Hà Nam" }, { code: "27", name: "Hà Tĩnh" },
+    { code: "28", name: "Hải Dương" }, { code: "29", name: "Hậu Giang" }, { code: "30", name: "Hòa Bình" }
+];
+// Quận/huyện theo mã tỉnh (chỉ hiển thị một số tỉnh tiêu biểu, bạn có thể thêm đầy đủ)
+const districts = {
+    "01": ["Ba Đình", "Hoàn Kiếm", "Hai Bà Trưng", "Đống Đa", "Tây Hồ", "Cầu Giấy", "Thanh Xuân", "Hoàng Mai", "Long Biên", "Bắc Từ Liêm", "Nam Từ Liêm", "Sóc Sơn", "Đông Anh", "Gia Lâm", "Thanh Trì", "Mê Linh", "Sơn Tây"],
+    "02": ["Quận 1", "Quận 2", "Quận 3", "Quận 4", "Quận 5", "Quận 6", "Quận 7", "Quận 8", "Quận 9", "Quận 10", "Quận 11", "Quận 12", "Bình Thạnh", "Tân Bình", "Tân Phú", "Phú Nhuận", "Gò Vấp", "Bình Tân", "Thủ Đức", "Nhà Bè", "Cần Giờ", "Hóc Môn", "Củ Chi", "Bình Chánh"],
+    "03": ["Hải Châu", "Thanh Khê", "Sơn Trà", "Ngũ Hành Sơn", "Liên Chiểu", "Cẩm Lệ", "Hòa Vang"],
+    "04": ["Ninh Kiều", "Bình Thủy", "Cái Răng", "Ô Môn", "Thốt Nốt", "Phong Điền", "Cờ Đỏ", "Vĩnh Thạnh", "Thới Lai"],
+    "05": ["Hồng Bàng", "Ngô Quyền", "Lê Chân", "Hải An", "Kiến An", "Đồ Sơn", "Dương Kinh", "Thủy Nguyên", "An Dương", "An Lão", "Kiến Thụy", "Tiên Lãng", "Vĩnh Bảo", "Cát Hải", "Bạch Long Vĩ"],
+    "11": ["Thành phố Bắc Ninh", "Yên Phong", "Quế Võ", "Tiên Du", "Từ Sơn", "Thuận Thành", "Gia Bình", "Lương Tài"],
+    "13": ["Thành phố Quy Nhơn", "An Lão", "Hoài Nhơn", "Hoài Ân", "Phù Mỹ", "Vĩnh Thạnh", "Tây Sơn", "Phù Cát", "An Nhơn", "Tuy Phước", "Vân Canh"],
+    "14": ["Thành phố Thủ Dầu Một", "Bàu Bàng", "Bến Cát", "Dầu Tiếng", "Phú Giáo", "Tân Uyên", "Thuận An", "Dĩ An", "Bắc Tân Uyên"],
+};
+
+// Đổ dữ liệu tỉnh vào select
+const provinceSelect = document.getElementById('province');
+const districtSelect = document.getElementById('district');
+
+provinces.forEach(prov => {
+    const opt = document.createElement('option');
+    opt.value = prov.code;
+    opt.textContent = prov.name;
+    provinceSelect.appendChild(opt);
+});
+
+// Sự kiện thay đổi tỉnh -> load quận/huyện
+provinceSelect.addEventListener('change', function() {
+    const provinceCode = this.value;
+    districtSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+    if (provinceCode && districts[provinceCode]) {
+        districts[provinceCode].forEach(districtName => {
+            const opt = document.createElement('option');
+            opt.value = districtName;
+            opt.textContent = districtName;
+            districtSelect.appendChild(opt);
+        });
+    }
+});
+</script>
+{% endblock %}

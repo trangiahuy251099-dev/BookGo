@@ -1,0 +1,58 @@
+/* Reset & font */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+    font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+}
+
+/* Card sản phẩm */
+.card-img-top {
+    height: 260px;
+    object-fit: cover;
+}
+.card {
+    transition: transform 0.2s;
+    background: rgba(255, 255, 255, 0.95);
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Nút xem thêm */
+.btn-load-more {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border: none;
+    color: white;
+    border-radius: 40px;
+    padding: 10px 24px;
+    transition: 0.3s;
+}
+.btn-load-more:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e3a8a);
+    transform: scale(1.02);
+}
+
+/* Dropdown gợi ý tìm kiếm */
+#suggestDropdown {
+    max-height: 400px;
+    overflow-y: auto;
+    border-radius: 1rem;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    z-index: 1050;
+}
+#suggestDropdown .dropdown-item {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+#suggestDropdown .dropdown-item:last-child {
+    border-bottom: none;
+}
+#suggestDropdown .dropdown-item:hover {
+    background-color: #f8f9fa;
+}

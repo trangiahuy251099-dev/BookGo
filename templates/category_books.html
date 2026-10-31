@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ category.name }} - BookGo{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="display-6 fw-bold">📖 {{ category.name }}</h1>
+    </div>
+</div>
+
+{% if books %}
+<div class="row g-4">
+    {% for book in books %}
+    <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="card h-100 shadow-sm border-0 rounded-4">
+            <a href="{{ url_for('book_detail', book_id=book.id) }}" class="text-decoration-none">
+                <img src="{{ book.cover }}" class="card-img-top rounded-top-4" style="height: 260px; object-fit: cover;" alt="{{ book.title }}">
+            </a>
+            <div class="card-body">
+                <h6 class="card-title fw-bold text-dark">{{ book.title }}</h6>
+                <p class="card-text text-muted small">{{ book.author }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-danger fw-bold fs-5">{{ "{:,}".format(book.price) }}đ</span>
+                    <span class="text-decoration-line-through text-secondary small">{{ "{:,}".format(book.original_price) }}đ</span>
+                </div>
+                <div class="mt-2">
+                    <span class="badge bg-success rounded-pill">Sẵn bán</span>
+                </div>
+                <div class="mt-3">
+                    <a href="{{ url_for('add_to_cart', book_id=book.id) }}" class="btn btn-warning w-100 rounded-pill fw-semibold btn-sm">
+                        <i class="bi bi-cart-plus-fill"></i> Thêm vào giỏ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">Chưa có sách trong danh mục này.</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}BookGo - Sách hay mỗi ngày{% endblock %}
+
+{% block content %}
+<div class="row g-4" id="booksContainer">
+    <!-- Sách sẽ được load bằng JavaScript -->
+</div>
+
+<div class="row mt-4">
+    <div class="col text-center">
+        <button id="loadMoreBtn" class="btn btn-outline-primary rounded-pill px-4 py-2">
+            <i class="bi bi-arrow-down-circle"></i> Xem Thêm
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let currentPage = 1;
+    const perPage = 8;
+    let maxPages = 7;
+    let isLoading = false;
+    let hasMore = true;
+
+    async function loadBooks(page) {
+        if (isLoading) return;
+        isLoading = true;
+        const btn = document.getElementById('loadMoreBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang tải...';
+
+        try {
+            const response = await fetch(`/api/books?page=${page}&per_page=${perPage}`);
+            const data = await response.json();
+            if (data.books && data.books.length > 0) {
+                renderBooks(data.books);
+            }
+            hasMore = data.has_more;
+            if (!hasMore || page >= maxPages) {
+                btn.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Lỗi tải sách:', error);
+        } finally {
+            isLoading = false;
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-arrow-down-circle"></i> Xem Thêm';
+        }
+    }
+
+    function renderBooks(books) {
+        const container = document.getElementById('booksContainer');
+        books.forEach(book => {
+            const col = document.createElement('div');
+            col.className = 'col-sm-6 col-md-4 col-lg-3';
+            col.innerHTML = `
+                <div class="card h-100 shadow-sm border-0 rounded-4">
+                    <a href="/book/${book.id}" class="text-decoration-none">
+                        <img src="${book.cover}" class="card-img-top rounded-top-4" alt="${book.title}" style="height: 260px; object-fit: cover;">
+                    </a>
+                    <div class="card-body">
+                        <h6 class="card-title fw-bold text-dark">${book.title.substring(0, 60)}${book.title.length > 60 ? '...' : ''}</h6>
+                        <p class="card-text text-muted small">${book.author}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-danger fw-bold fs-5">${formatPrice(book.price)}đ</span>
+                            <span class="text-decoration-line-through text-secondary small">${formatPrice(book.original_price)}đ</span>
+                        </div>
+                        <div class="mt-2">
+                            <span class="badge bg-success rounded-pill">Sẵn bán</span>
+                        </div>
+                        <div class="mt-3">
+                            <a href="/add-to-cart/${book.id}" class="btn btn-warning w-100 rounded-pill fw-semibold btn-sm">
+                                <i class="bi bi-cart-plus-fill"></i> Thêm vào giỏ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(col);
+        });
+    }
+
+    function formatPrice(price) {
+        return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    loadBooks(1);
+    document.getElementById('loadMoreBtn').addEventListener('click', () => {
+        if (currentPage < maxPages && hasMore) {
+            currentPage++;
+            loadBooks(currentPage);
+        }
+    });
+</script>
+{% endblock %}

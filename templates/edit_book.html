@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Sửa sách - Admin{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow border-0 rounded-4">
+            <div class="card-header bg-warning text-dark rounded-top-4">
+                <h4 class="mb-0"><i class="bi bi-pencil-square"></i> Chỉnh sửa sách</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Tên sách</label>
+                            <input type="text" name="title" class="form-control rounded-pill" value="{{ book.title }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tác giả</label>
+                            <input type="text" name="author" class="form-control rounded-pill" value="{{ book.author }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Giá bán (VNĐ)</label>
+                            <input type="number" name="price" class="form-control rounded-pill" value="{{ book.price }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Giá gốc (VNĐ)</label>
+                            <input type="number" name="original_price" class="form-control rounded-pill" value="{{ book.original_price }}" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Ảnh bìa hiện tại</label><br>
+                            <img src="{{ book.cover }}" alt="{{ book.title }}" width="100" class="rounded shadow-sm mb-2">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Cập nhật ảnh mới (file)</label>
+                            <input type="file" name="cover_file" class="form-control" accept="image/*">
+                            <div class="text-muted small mt-1">Để trống nếu không muốn đổi ảnh</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Hoặc nhập URL ảnh mới</label>
+                            <input type="url" name="cover_url" class="form-control rounded-pill" placeholder="https://..." value="{{ book.cover }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Mô tả</label>
+                            <textarea name="description" class="form-control" rows="4" required>{{ book.description }}</textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Số trang</label>
+                            <input type="number" name="pages" class="form-control rounded-pill" value="{{ book.pages }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nhà xuất bản</label>
+                            <input type="text" name="publisher" class="form-control rounded-pill" value="{{ book.publisher }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Danh mục</label>
+                            <select name="category_id" class="form-select rounded-pill">
+                                <option value="">-- Chọn danh mục --</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if book.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-4 d-flex justify-content-between">
+                        <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="bi bi-save"></i> Lưu thay đổi</button>
+                        <a href="{{ url_for('admin_books') }}" class="btn btn-secondary rounded-pill px-4">Hủy</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

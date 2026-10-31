@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Quản lý đơn hàng - Admin{% endblock %}
+
+{% block content %}
+<h2>Quản lý đơn hàng</h2>
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Mã đơn</th>
+                <th>Khách hàng</th>
+                <th>Ngày đặt</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+             </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>#{{ order.id }}</td>
+                <td>{{ order.user.fullname }}<br><small>{{ order.user.username }}</small></td>
+                <td>{{ order.order_date.strftime('%d/%m/%Y') }}</td>
+                <td>{{ "{:,}".format(order.total_price) }}đ</td>
+                <td>
+                    <form method="post" action="{{ url_for('update_order_status', order_id=order.id) }}" class="d-flex gap-2">
+                        <select name="status" class="form-select form-select-sm">
+                            <option value="Đang xử lý" {% if order.status == 'Đang xử lý' %}selected{% endif %}>Đang xử lý</option>
+                            <option value="Đang giao" {% if order.status == 'Đang giao' %}selected{% endif %}>Đang giao</option>
+                            <option value="Đã giao" {% if order.status == 'Đã giao' %}selected{% endif %}>Đã giao</option>
+                            <option value="Hủy" {% if order.status == 'Hủy' %}selected{% endif %}>Hủy</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary">Cập nhật</button>
+                    </form>
+                </td>
+                <td><a href="{{ url_for('order_detail', order_id=order.id) }}" class="btn btn-sm btn-info">Xem</a></td>
+             </tr>
+            {% endfor %}
+        </tbody>
+     </table>
+</div>
+{% endblock %}
